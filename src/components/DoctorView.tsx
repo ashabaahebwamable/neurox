@@ -177,8 +177,10 @@ export default function DoctorView({ user, cases, onUpdateCase }: DoctorViewProp
                               fill="none"
                               stroke="#3b82f6"
                               strokeWidth="10"
+                              strokeLinejoin="round"
                               strokeLinecap="round"
-                              filter="blur(6px)"
+                              strokeDasharray="0 1"
+                              style={{ filter: 'blur(6px)' }}
                             />
                             <motion.path
                               initial={{ pathLength: 0, opacity: 0 }}
@@ -187,7 +189,9 @@ export default function DoctorView({ user, cases, onUpdateCase }: DoctorViewProp
                               fill="none"
                               stroke="#60a5fa"
                               strokeWidth="2.5"
+                              strokeLinejoin="round"
                               strokeLinecap="round"
+                              strokeDasharray="0 1"
                               className="drop-shadow-[0_0_8px_rgba(96,165,250,0.8)]"
                             />
                           </svg>

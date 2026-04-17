@@ -10,7 +10,6 @@ import {
   Send
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { GoogleGenAI } from "@google/genai";
 
 interface RadiologistViewProps {
   cases: any[];
@@ -48,62 +47,33 @@ export default function RadiologistView({ cases, onAddCase }: RadiologistViewPro
     setAnalyzing(true);
     setAnalysis(null);
     setShowOverlay(true);
-    
+
     try {
-      const apiKey = process.env.GEMINI_API_KEY || import.meta.env.VITE_GEMINI_API_KEY;
-      if (!apiKey) {
-        console.warn('GEMINI_API_KEY is not available in the browser. Using fallback mock segmentation.');
-        // Fallback mock if no API key - generate a random-ish path
-        setTimeout(() => {
-          const pathologies = [
-            "ResUNet detected peripheral nerve structure with high confidence. White hyper-echoic regions identified as nerve bundles.",
-            "AI Analysis: Signs of nerve compression detected at the distal segment. Recommend clinical correlation.",
-            "Segmentation complete. Nerve bundles appear normal with no significant inflammation detected.",
-            "Pathology Alert: Mild inflammation and structural irregularity observed in the median nerve bundle."
-          ];
-          const randomFinding = pathologies[Math.floor(Math.random() * pathologies.length)];
-          const randomPath = `M ${20 + Math.random() * 20} ${30 + Math.random() * 20} Q ${50} ${10 + Math.random() * 20} ${70 + Math.random() * 20} ${30 + Math.random() * 20} T ${90} ${50 + Math.random() * 20}`;
-          setAnalysis({
-            findings: randomFinding,
-            confidence: 0.88 + Math.random() * 0.1,
-            maskPath: randomPath
-          });
-          setAnalyzing(false);
-        }, 1500);
-        return;
+      const response = await fetch('/api/segment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageData: img })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`AI segmentation failed: ${response.status} ${errorText}`);
       }
 
-      const ai = new GoogleGenAI({ apiKey });
-      
-      const prompt = "Analyze this musculoskeletal ultrasound image for peripheral nerve segmentation and clinical pathology. Nerves appear as white/hyperechoic structures. Identify the nerve bundles and specifically look for signs of pathology such as nerve compression, inflammation, or structural irregularities. Provide a detailed clinical finding summary (mentioning specific issues like 'nerve compression' if detected) and a confidence score (0-1). Also provide a detailed, organic SVG path (M x y Q x1 y1 x2 y2 ...) that highlights the nerve bundles (strings) found in a 100x100 coordinate system. Return JSON format: { 'findings': string, 'confidence': number, 'maskPath': string }";
-      
-      const mimeType = img.startsWith('data:image/png') ? 'image/png' : img.startsWith('data:image/jpeg') ? 'image/jpeg' : 'application/octet-stream';
-      const result = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: [
-          { text: prompt },
-          { inlineData: { data: img.split(',')[1], mimeType } }
-        ]
-      });
-      
-      const response = result;
-      const text = response.text || "";
-      const jsonMatch = text.match(/\{.*\}/s);
-      const data = jsonMatch ? JSON.parse(jsonMatch[0]) : { 
-        findings: "Analysis complete", 
-        confidence: 0.9,
-        maskPath: "M 30 40 Q 50 20 70 40 T 90 60"
-      };
-      
+      const data = await response.json();
+      if (!data?.maskPath) {
+        throw new Error('AI segmentation returned no maskPath');
+      }
+
       setAnalysis(data);
       toast.success('AI Segmentation complete');
     } catch (error) {
-      console.error(error);
+      console.error('AI segmentation error:', error);
       toast.error('AI analysis failed. Using fallback diagnostics.');
       setAnalysis({
-        findings: "Manual review required. AI inference timeout.",
+        findings: 'Manual review required. AI inference timeout.',
         confidence: 0.85,
-        maskPath: "M 20 50 Q 50 30 80 50"
+        maskPath: 'M 20 50 Q 50 30 80 50'
       });
     } finally {
       setAnalyzing(false);
@@ -266,7 +236,9 @@ export default function RadiologistView({ cases, onAddCase }: RadiologistViewPro
                           fill="none"
                           stroke="#60a5fa"
                           strokeWidth="2.5"
+                          strokeLinejoin="round"
                           strokeLinecap="round"
+                          strokeDasharray="0 1"
                           className="drop-shadow-[0_0_8px_rgba(96,165,250,0.8)]"
                         />
                       </svg>
