@@ -50,8 +50,9 @@ export default function RadiologistView({ cases, onAddCase }: RadiologistViewPro
     setShowOverlay(true);
     
     try {
-      const apiKey = process.env.GEMINI_API_KEY;
+      const apiKey = process.env.GEMINI_API_KEY || import.meta.env.VITE_GEMINI_API_KEY;
       if (!apiKey) {
+        console.warn('GEMINI_API_KEY is not available in the browser. Using fallback mock segmentation.');
         // Fallback mock if no API key - generate a random-ish path
         setTimeout(() => {
           const pathologies = [
@@ -76,11 +77,12 @@ export default function RadiologistView({ cases, onAddCase }: RadiologistViewPro
       
       const prompt = "Analyze this musculoskeletal ultrasound image for peripheral nerve segmentation and clinical pathology. Nerves appear as white/hyperechoic structures. Identify the nerve bundles and specifically look for signs of pathology such as nerve compression, inflammation, or structural irregularities. Provide a detailed clinical finding summary (mentioning specific issues like 'nerve compression' if detected) and a confidence score (0-1). Also provide a detailed, organic SVG path (M x y Q x1 y1 x2 y2 ...) that highlights the nerve bundles (strings) found in a 100x100 coordinate system. Return JSON format: { 'findings': string, 'confidence': number, 'maskPath': string }";
       
+      const mimeType = img.startsWith('data:image/png') ? 'image/png' : img.startsWith('data:image/jpeg') ? 'image/jpeg' : 'application/octet-stream';
       const result = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
         contents: [
           { text: prompt },
-          { inlineData: { data: img.split(',')[1], mimeType: "image/jpeg" } }
+          { inlineData: { data: img.split(',')[1], mimeType } }
         ]
       });
       
@@ -253,8 +255,9 @@ export default function RadiologistView({ cases, onAddCase }: RadiologistViewPro
                           fill="none"
                           stroke="#3b82f6"
                           strokeWidth="10"
+                          strokeLinejoin="round"
                           strokeLinecap="round"
-                          filter="blur(6px)"
+                          style={{ filter: 'blur(6px)' }}
                         />
                         <motion.path
                           initial={{ pathLength: 0, opacity: 0 }}
