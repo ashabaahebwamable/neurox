@@ -129,7 +129,7 @@ async function startServer() {
 
       const ai = new GoogleGenAI({ apiKey });
       const mimeType = imageData.startsWith('data:image/png') ? 'image/png' : imageData.startsWith('data:image/jpeg') ? 'image/jpeg' : 'image/jpeg';
-      const prompt = "Analyze this musculoskeletal ultrasound image for peripheral nerve segmentation and clinical pathology. Nerves appear as white/hyperechoic structures. Identify the nerve bundles and specifically look for signs of pathology such as nerve compression, inflammation, or structural irregularities. Provide a detailed clinical finding summary (mentioning specific issues like 'nerve compression' if detected) and a confidence score (0-1). Also provide a detailed, organic SVG path (M x y Q x1 y1 x2 y2 ...) that highlights the nerve bundles (strings) found in a 100x100 coordinate system. Return JSON format: { 'findings': string, 'confidence': number, 'maskPath': string }";
+      const prompt = "Analyze this musculoskeletal ultrasound image for peripheral nerve segmentation and clinical pathology. Nerves appear as white/hyperechoic structures. Identify the nerve bundles and specifically look for signs of pathology such as nerve compression, inflammation, or structural irregularities. Provide a detailed clinical finding summary (mentioning specific issues like 'nerve compression' if detected) and a confidence score (0-1). Also provide a detailed, organic SVG path (M x y Q x1 y1 x2 y2 ... Z) that highlights the nerve bundles and forms a closed mask shape around the identified area in a 100x100 coordinate system. Return JSON format: { 'findings': string, 'confidence': number, 'maskPath': string }";
 
       const result = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',

@@ -171,28 +171,12 @@ export default function DoctorView({ user, cases, onUpdateCase }: DoctorViewProp
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                           <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
                             <motion.path
-                              initial={{ pathLength: 0, opacity: 0 }}
-                              animate={{ pathLength: 1, opacity: 0.5 }}
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
                               d={selectedCase.maskPath}
-                              fill="none"
-                              stroke="#3b82f6"
-                              strokeWidth="10"
-                              strokeLinejoin="round"
-                              strokeLinecap="round"
-                              strokeDasharray="0 1"
-                              style={{ filter: 'blur(6px)' }}
-                            />
-                            <motion.path
-                              initial={{ pathLength: 0, opacity: 0 }}
-                              animate={{ pathLength: 1, opacity: 1 }}
-                              d={selectedCase.maskPath}
-                              fill="none"
-                              stroke="#60a5fa"
-                              strokeWidth="2.5"
-                              strokeLinejoin="round"
-                              strokeLinecap="round"
-                              strokeDasharray="0 1"
-                              className="drop-shadow-[0_0_8px_rgba(96,165,250,0.8)]"
+                              fill="#3b82f6"
+                              fillOpacity="0.18"
+                              stroke="none"
                             />
                           </svg>
                         </div>

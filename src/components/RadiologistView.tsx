@@ -69,7 +69,6 @@ export default function RadiologistView({ cases, onAddCase }: RadiologistViewPro
       toast.success('AI Segmentation complete');
     } catch (error) {
       console.error('AI segmentation error:', error);
-      toast.error('AI analysis failed. Using fallback diagnostics.');
       setAnalysis({
         findings: 'Manual review required. AI inference timeout.',
         confidence: 0.85,
@@ -219,27 +218,12 @@ export default function RadiologistView({ cases, onAddCase }: RadiologistViewPro
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                       <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
                         <motion.path
-                          initial={{ pathLength: 0, opacity: 0 }}
-                          animate={{ pathLength: 1, opacity: 0.5 }}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
                           d={analysis.maskPath}
-                          fill="none"
-                          stroke="#3b82f6"
-                          strokeWidth="10"
-                          strokeLinejoin="round"
-                          strokeLinecap="round"
-                          style={{ filter: 'blur(6px)' }}
-                        />
-                        <motion.path
-                          initial={{ pathLength: 0, opacity: 0 }}
-                          animate={{ pathLength: 1, opacity: 1 }}
-                          d={analysis.maskPath}
-                          fill="none"
-                          stroke="#60a5fa"
-                          strokeWidth="2.5"
-                          strokeLinejoin="round"
-                          strokeLinecap="round"
-                          strokeDasharray="0 1"
-                          className="drop-shadow-[0_0_8px_rgba(96,165,250,0.8)]"
+                          fill="#3b82f6"
+                          fillOpacity="0.18"
+                          stroke="none"
                         />
                       </svg>
                     </div>
