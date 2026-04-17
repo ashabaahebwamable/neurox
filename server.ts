@@ -1,3 +1,4 @@
+import dotenv from 'dotenv';
 import express from 'express';
 import { createServer as createViteServer } from 'vite';
 import path from 'path';
@@ -9,6 +10,8 @@ import cors from 'cors';
 import multer from 'multer';
 import fs from 'fs';
 import { GoogleGenAI } from '@google/genai';
+
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
 const JWT_SECRET = 'neurox_secret_key_2026';
 const PORT = 3000;
@@ -119,12 +122,8 @@ async function startServer() {
 
       const apiKey = process.env.GEMINI_API_KEY;
       if (!apiKey) {
-        console.warn('Missing GEMINI_API_KEY in server environment. Returning fallback segmentation.');
-        return res.json({
-          findings: 'AI segmentation fallback active. API key not configured.',
-          confidence: 0.7,
-          maskPath: 'M 20 50 Q 50 20 80 50 T 90 70'
-        });
+        console.warn('Missing GEMINI_API_KEY in server environment. Make sure .env contains GEMINI_API_KEY and restart the server.');
+        return res.status(500).json({ message: 'GEMINI_API_KEY not configured on server.' });
       }
 
       const ai = new GoogleGenAI({ apiKey });
