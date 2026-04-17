@@ -172,11 +172,9 @@ export default function DoctorView({ user, cases, onUpdateCase }: DoctorViewProp
                           <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
                             <motion.path
                               initial={{ opacity: 0 }}
-                              animate={{ opacity: 1 }}
+                              animate={{ opacity: 0.35 }}
                               d={selectedCase.maskPath}
-                              fill="#1d4ed8"
-                              fillOpacity="0.32"
-                              stroke="none"
+                              fill="#3b82f6"
                             />
                           </svg>
                         </div>

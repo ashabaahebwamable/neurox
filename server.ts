@@ -1,4 +1,3 @@
-import dotenv from 'dotenv';
 import express from 'express';
 import { createServer as createViteServer } from 'vite';
 import path from 'path';
@@ -9,9 +8,6 @@ import jwt from 'jsonwebtoken';
 import cors from 'cors';
 import multer from 'multer';
 import fs from 'fs';
-import { GoogleGenAI } from '@google/genai';
-
-dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
 const JWT_SECRET = 'neurox_secret_key_2026';
 const PORT = 3000;
@@ -102,7 +98,7 @@ async function initDb() {
 
 async function startServer() {
   const app = express();
-  app.use(express.json({ limit: '12mb' }));
+  app.use(express.json());
   app.use(cors());
 
   // Ensure uploads directory exists
@@ -112,46 +108,6 @@ async function startServer() {
     fs.mkdirSync(uploadDir, { recursive: true });
   }
   app.use('/uploads', express.static('uploads'));
-
-  app.post('/api/segment', async (req, res) => {
-    try {
-      const imageData = req.body?.imageData;
-      if (!imageData) {
-        return res.status(400).json({ message: 'Missing imageData' });
-      }
-
-      const apiKey = process.env.GEMINI_API_KEY;
-      if (!apiKey) {
-        console.warn('Missing GEMINI_API_KEY in server environment. Make sure .env contains GEMINI_API_KEY and restart the server.');
-        return res.status(500).json({ message: 'GEMINI_API_KEY not configured on server.' });
-      }
-
-      const ai = new GoogleGenAI({ apiKey });
-      const mimeType = imageData.startsWith('data:image/png') ? 'image/png' : imageData.startsWith('data:image/jpeg') ? 'image/jpeg' : 'image/jpeg';
-      const prompt = "Analyze this musculoskeletal ultrasound image for peripheral nerve segmentation and clinical pathology. Nerves appear as white/hyperechoic structures. Identify the nerve bundles and specifically look for signs of pathology such as nerve compression, inflammation, or structural irregularities. Provide a detailed clinical finding summary (mentioning specific issues like 'nerve compression' if detected) and a confidence score (0-1). Also provide a detailed, organic SVG path (M x y Q x1 y1 x2 y2 ... Z) that highlights the nerve bundles and forms a closed mask shape around the identified area in a 100x100 coordinate system. Return JSON format: { 'findings': string, 'confidence': number, 'maskPath': string }";
-
-      const result = await ai.models.generateContent({
-        model: 'gemini-3-flash-preview',
-        contents: [
-          { text: prompt },
-          { inlineData: { data: imageData.split(',')[1], mimeType } }
-        ]
-      });
-
-      const text = result.text || '';
-      const jsonMatch = text.match(/\{.*\}/s);
-      const data = jsonMatch ? JSON.parse(jsonMatch[0]) : {
-        findings: 'AI analysis complete',
-        confidence: 0.9,
-        maskPath: 'M 30 40 Q 50 20 70 40 T 90 60'
-      };
-
-      res.json(data);
-    } catch (error) {
-      console.error('AI segmentation error:', error);
-      res.status(500).json({ message: 'AI segmentation failed' });
-    }
-  });
 
   // Health check
   app.get('/api/health', (req, res) => {
