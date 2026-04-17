@@ -221,8 +221,8 @@ export default function RadiologistView({ cases, onAddCase }: RadiologistViewPro
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           d={analysis.maskPath}
-                          fill="#3b82f6"
-                          fillOpacity="0.18"
+                          fill="#1d4ed8"
+                          fillOpacity="0.32"
                           stroke="none"
                         />
                       </svg>
